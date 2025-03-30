@@ -1,0 +1,27 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: pkce-chat-client
+            client-authentication-method: none
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
+            redirect-uri: http://localhost:3000/login/oauth2/code/keycloak
+            client-name: Keycloak
+            provider: keycloak
+
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/chat-realm
+            authorization-uri: http://localhost:8080/realms/chat-realm/protocol/openid-connect/auth
+            token-uri: http://localhost:8080/realms/chat-realm/protocol/openid-connect/token
+            user-info-uri: http://localhost:8080/realms/chat-realm/protocol/openid-connect/userinfo
+            jwk-set-uri: http://localhost:8080/realms/chat-realm/protocol/openid-connect/certs
+server:
+  port: 8090
+
+logging:
+  level:
+    org.springframework.security: trace
