@@ -17,6 +17,8 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -80,7 +82,7 @@ public class SecurityConf {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:3000")); // Только ваш фронтенд
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Добавьте OPTIONS!
-        configuration.setAllowedHeaders(List.of("*")); // Разрешите все заголовки
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Разрешите все заголовки
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(List.of("Authorization", "Set-Cookie")); // Какие заголовки доступны фронтенду
 
@@ -110,6 +112,7 @@ public class SecurityConf {
 
 
 
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         System.out.println("sdkgfaksdjkla");
@@ -117,24 +120,18 @@ public class SecurityConf {
                 .headers(headers -> headers
                         .referrerPolicy(referrer -> referrer.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)
+                        .httpStrictTransportSecurity(HeadersConfigurer.HstsConfig::disable)
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-//                .cors(CorsConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/", "/public/**", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/", "/public/**", "/css/**","/ws-chat/**","/error/**","/topic/**", "/app/**", "/js/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2.
                         defaultSuccessUrl("http://localhost:3000/home", true)
-//                        .userInfoEndpoint(userInfo -> userInfo
-//                                .userService(oidcUserService())
-//                        )
                 )
-//                .oauth2Login(oauth2 -> oauth2
-//                        .loginPage("/oauth2/authorization/keycloak")
-//                )
+
                 .logout(logout -> logout
                         .logoutSuccessUrl("/")
                         .invalidateHttpSession(true)
@@ -143,20 +140,6 @@ public class SecurityConf {
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())));
 
         return http.build();
-//        http
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/public/**").permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .oauth2Login(oauth2 -> oauth2
-//                        .loginPage("/oauth2/authorization/keycloak")
-//                )
-//                .oauth2Client(withDefaults())
-//                .oauth2ResourceServer(oauth2 -> oauth2
-//                        .jwt(withDefaults())
-//                );
-//
-//        return http.build();
     }
 
 
